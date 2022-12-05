@@ -9,7 +9,7 @@ let createCart = async (req, res) => {
     try {
         let userId = req.params.userId
         let { cartId, productId } = req.body
-
+       // productId-->mandatory
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: 'Please enter data to create' })
 
         if (!productId) return res.status(400).send({ status: false, message: 'product id is mandatory' })
@@ -28,7 +28,7 @@ let createCart = async (req, res) => {
 
         let findCart
 
-        if ("cartId" in req.body) {
+        if ("cartId" in req.body) {            //not  mandatory
             if (typeof cartId != "string") return res.status(400).send({ status: false, message: 'cartId should be string' })
             if (!validator.isValid(cartId)) return res.status(400).send({ status: false, message: 'please enter cartId ' })
             if (!mongoose.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: 'invalid cartId' })
@@ -37,10 +37,12 @@ let createCart = async (req, res) => {
 
         } else {
             findCart = await cartModel.findOne({ userId: userId })
+            //cartid is not avaliable then it goes and check user id --->then cartid check karga
         }
 
         if (findCart) {
-            let alreadyProductsId = findCart.items.map(x => x.productId.toString())
+            let alreadyProductsId = findCart.items.map(x => x.productId.toString())  //already product id =[product_id]
+               //items[{product-id}]
 
             if (alreadyProductsId.includes(productId)) {
                 let updatedCart = await cartModel.findOneAndUpdate({ "items.productId": productId, userId: userId }, { $inc: { "items.$.quantity": 1, totalPrice: productPrice } }, { new: true })
@@ -117,7 +119,7 @@ const updatedCart = async (req, res) => {
         let userId = req.params.userId;
         let data = req.body;
         let { productId, cartId, removeProduct } = data;
-
+        //removeproduct-0,1-->user will give
         removeProduct = parseInt(removeProduct) // convert into number from string
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: 'please enter data to update' })

@@ -5,18 +5,16 @@ const mongoose = require('mongoose')
 const authentication = async function (req, res, next) {
     try {
         let token = req.headers.authorization
-
-        if (!token) return res.status(400).send({ status: false, message: "token must be present" });
-
-        token = token.split(" ")[1];
-
-        jwt.verify(token, "GroupNumber19", function (err, decoded) {
+         if (!token) return res.status(400).send({ status: false, message: "token must be present" });
+          token = token.split(" ")[1];    ///string to array
+  
+        jwt.verify(token, "GroupNumber19", function (err, decoded) {         //verfiy error  //token, "GroupNumber19--->
             if (err) {
                 return res.status(401).send({ status: false, message: err.message })
 
             } else {
-                req.decodedToken = decoded
-                next()
+                req.decodedToken = decoded              ///req.decodedToken =key==decoded=value
+                next() 
             }
         })
     }

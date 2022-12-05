@@ -27,6 +27,6 @@ const orderSchema = new mongoose.Schema({
 
     //isDeleted: { type: Boolean },
 
-}, { versionKey: false, timestamps: true })
+}, { versionKey: false, timestamps: true })     //version 
 
 module.exports = mongoose.model("order", orderSchema)

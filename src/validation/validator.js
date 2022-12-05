@@ -9,6 +9,7 @@ const isValidName = (name) => {
         return true
 }
 
+///funcction with variable //callback-function
 const isValid = (value) => {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value === "string" && value.trim().length === 0) return false    //""-->type string -->length-->0

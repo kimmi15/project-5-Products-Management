@@ -50,8 +50,8 @@ const userRegister = async function (req, res) {
         let Fulladdress;
 
         try {
-            Fulladdress = JSON.parse(address)  //
-        } catch (err) {
+            Fulladdress = JSON.parse(address)  //the value inside form data takes in string formate so its convert inti
+          } catch (err) {                          //object formate we have parse into object
             if (err) {
                 return res.status(400).send({ status: false, message: "please enter the address in right format or the pincode should not start with 0" })
             }
@@ -86,11 +86,16 @@ const userRegister = async function (req, res) {
         data.password = bcryptPassword
 
         //-----------[File upload on AWS]
-        data.profileImage = await uploadFile.uploadFile(files[0])
+      
 
         //------------------[Unique field check DB calls]
 
         const emailUnique = await userModel.findOne({ email })
+       
+        data.profileImage = await uploadFile.uploadFile(files[0])   ///files uploaded into array formate
+        //[{"key":"value"},{}]
+      
+        
         if (emailUnique) return res.status(400).send({ status: false, message: 'Already register Email' })
 
         const phoneUnique = await userModel.findOne({ phone })
@@ -129,8 +134,7 @@ const userLogin = async function (req, res) {
 
     //----------[JWT token generate]
     let token = jwt.sign({
-        userId: Login._id
-        //.toString()       //
+        userId: Login._id.toString()       //to remove Object_id
     }, "GroupNumber19", { expiresIn: '50d' })
 
     // res.setHeader("x-api-key", token)
@@ -172,11 +176,12 @@ let updateProfile = async (req, res) => {
         let files = req.files;
 
         let { fname, lname, email, phone, password, address, ...rest } = data;
+        //...rest -->invalid key
 
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `you can't update on ${Object.keys(rest)} key` })
 
         if (Object.keys(data).length == 0 && !files) return res.status(400).send({ status: false, message: 'enter data to update' });
-
+         //data or file not  given by user 
         let finduser = await userModel.findOne({ _id: userId });
         if (!finduser) return res.status(404).send({ status: false, message: 'user id does not exist' });
 
@@ -212,10 +217,13 @@ let updateProfile = async (req, res) => {
             finduser.password = bcryptPassword
         }
 
-        if (files && files.length > 0) {
+        if (files && files.length > 0) {  //files-->[]-->truth
+            console.log(files)
             if (!validator.isValidFile(files[0].originalname)) return res.status(400).send({ status: false, message: 'File type should be png|gif|webp|jpeg|jpg' })
-            finduser.profileImage = await uploadFile.uploadFile(files[0])
+            finduser.profileImage = await uploadFile.uploadFile(files[0])    ///originalname-->key
+          
         }
+
 
         if (address) {
             try {
@@ -245,11 +253,11 @@ let updateProfile = async (req, res) => {
                     finduser.address.shipping.city = city;
                 }
 
-                if ("pincode" in shipping) {
+             if ("pincode" in shipping) {
                     if (!(/^[1-9]{1}[0-9]{5}$/).test(pincode)) return res.status(400).send({ status: false, message: "invalid Pincode in shipping" })
                     finduser.address.shipping.pincode = pincode;
                 }
-            }
+            }   
 
             if ("billing" in address) {                //Update billing address
 
@@ -276,7 +284,7 @@ let updateProfile = async (req, res) => {
         }
 
         //Update Profile
-        let updateProfile = await userModel.findByIdAndUpdate({ _id: userId }, finduser, { new: true });
+         let updateProfile = await userModel.findByIdAndUpdate({ _id: userId }, finduser, { new: true });
 
         //Send Response
         res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
