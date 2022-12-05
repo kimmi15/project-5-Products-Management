@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const app = express();
 const multer = require('multer')
 
+const PORT = process.env.PORT || 3000
+
 app.use(bodyParser.json());
 app.use(multer().any());
 app.use(bodyParser.urlencoded({extended : true}));
@@ -25,6 +27,6 @@ mongoose
 
 app.use("/", route);
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log("Port running on " + (process.env.PORT || 3000));
+app.listen(PORT, function () {
+  console.log("Port running on " + (PORT));
 });
